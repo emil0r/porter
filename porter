@@ -9,7 +9,7 @@
          '[clojure.set :as set])
 
 (deps/add-deps '{:deps {com.github.emil0r/porter {:git/url "https://github.com/emil0r/porter"
-                                                  :sha     "7be0406876127ceaa5f3936324d28492fecd0a3c"}}})
+                                                  :sha     "a0fe78c48c3c5e155739fe295f8c884e31ad4ee6"}}})
 
 (require '[porter.core :as porter])
 

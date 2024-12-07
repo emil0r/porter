@@ -123,3 +123,9 @@ library via the command line.
 curl -o /usr/local/bin/porter https://raw.githubusercontent.com/emil0r/porter/refs/heads/master/porter
 chmod +x /usr/local/bin/porter
 ----
+
+.Example usage from local testing
+[source, shell]
+----
+./porter --env :local --src "dev-resources/test.tester.yml" --ctx-paths "dev-resources/test.tester.edn" --print true --dest testus.yml --injections '{:version "1.0.0"}' --classpaths "." --namespaces tester
+----
