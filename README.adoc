@@ -120,5 +120,5 @@ library via the command line.
 
 
 ```
-scp https://github.com/emil0r/porter/blob/master/porter /usr/local/bin/porter
+curl -o /usr/local/bin/porter https://raw.githubusercontent.com/emil0r/porter/refs/heads/master/porter
 ```
