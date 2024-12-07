@@ -1,8 +1,10 @@
 #!/usr/bin/env bb
 
 (require '[babashka.cli :as cli]
+         '[babashka.classpath :as cp]
          '[babashka.deps :as deps]
          '[babashka.fs :as fs]
+         '[clojure.edn :as edn]
          '[clojure.set :as set])
 
 
@@ -18,17 +20,18 @@
 
 (def cli-spec
   {:spec
-   {:env       {:coerce  :keyword
-                :desc    "Which environment are we deploying to: "}
-    :src       {:coerce  :string
-                :desc    "Which target in the build files are we targeting?"}
-    :dest      {:coerce :string
-                :desc   "Which file to write the output to"}
-    :print     {:coerce :boolean
-                :desc   "Print the output to stdout"}
-    :ctx-paths {:coerce   [:string]
-                :desc     "vector of strings to context edn files"
-                :required true}}
+   {:env        {:coerce :keyword
+                 :desc   "Which environment are we deploying to: "}
+    :src        {:coerce :string
+                 :desc   "Which target in the build files are we targeting?"}
+    :injections {:desc   "Map of injections to the context map"}
+    :dest       {:coerce :string
+                 :desc   "Which file to write the output to"}
+    :print      {:coerce :boolean
+                 :desc   "Print the output to stdout"}
+    :ctx-paths  {:coerce   [:string]
+                 :desc     "vector of strings to context edn files"
+                 :required true}}
 
    :error-fn ;; a function to handle errors
    (fn [{:keys [_spec type cause msg option] :as _data}]
@@ -42,12 +45,18 @@
           (format "%s does not exist!\n" msg)))))})
 
 (defn -main [& args]
-  (let [opts (cli/parse-opts args cli-spec)]
+  (let [opts (cli/parse-opts args cli-spec)
+        injections (when (string? (:injections opts))
+                     (try (edn/read-string (:injections opts))
+                          (catch Exception _
+                            (println "Unable to read injections"))))]
+    (println (type injections) injections)
     (cond
       (or (:help opts)
           (:h opts)
           (empty? opts))
-      (println "-- Options --\n\n" (show-help cli-spec))
+      (do (println "\n-- Options --\n")
+          (println (show-help cli-spec)))
 
       (or (not (contains? opts :env))
           (not (contains? opts :src))
@@ -60,7 +69,8 @@
        (:env opts)
        (:src opts)
        {:dest (:dest opts)
-        :print? (:print opts)}
+        :print? (:print opts)
+        :injections injections}
        (:ctx-paths opts))
 
       :else
@@ -68,7 +78,8 @@
        (:env opts)
        (:src opts)
        {:dest (:dest opts)
-        :print? (:print opts)}
+        :print? (:print opts)
+        :injections injections}
        (:ctx-paths opts)))))
 
 

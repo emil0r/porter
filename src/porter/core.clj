@@ -152,8 +152,8 @@
                #{} ks)))
 
 
-(defn build-output [env src {?dest :dest print? :print? namespaces :namespaces} ctx-paths]
-  (let [ctx (create-ctx {:env env} ctx-paths namespaces)
+(defn build-output [env src {:keys [dest print? namespaces injections]} ctx-paths]
+  (let [ctx (create-ctx (merge {:env env} injections) ctx-paths namespaces)
         ks-in-src (map (fn [[s exp]]
                          [s (edn/read-string exp)])
                        (re-seq #"\$\{([^\}]+)\}" src))
@@ -164,15 +164,15 @@
                                :ctx-paths ctx-paths})
 
       :else
-      (let [config (reduce (fn [out [s k]]
+      (let [config (reduce (fn [out [_s k]]
                              (let [v (or (get ctx k)
                                          (get-in ctx k))]
                                (str/replace out (re-k k) v)))
                            src ks-in-src)]
         (cond
-          (and ?dest print?)
+          (and dest print?)
           (do (println config)
-              (spit ?dest config))
+              (spit dest config))
 
           print?
           (do (println config)
