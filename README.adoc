@@ -121,4 +121,5 @@ library via the command line.
 [source, shell]
 ----
 curl -o /usr/local/bin/porter https://raw.githubusercontent.com/emil0r/porter/refs/heads/master/porter
+chmod +x /usr/local/bin/porter
 ----
