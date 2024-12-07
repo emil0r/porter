@@ -1,0 +1,2 @@
+{:full.path/here "full-path-here"
+ :another {:full {:path {:here "another-full-path-here"}}}}

@@ -1,0 +1,5 @@
+{:full.path/here "full-path-here"
+ :another {:full {:path {:here "another-full-path-here"}}}
+ :test-data (porter.helper/my-test-fn ctx)
+ :test-fn-data {:foobar true
+                :foobaz false}}

@@ -1,0 +1,113 @@
+= babashka library for creating config files
+
+Still a bit a experimental
+
+== Usage
+
+* `build-output` takes [env, src, opts, ctx-paths] as arguments
+** env is required can be things like :local, :staging, :production,
+   etc
+** src is the source input in the form of a string
+** opts is a map with expected keys :dest, :print? and :namespaces
+** ctx-paths is the context to be read from files to be put into the
+   src
+
+.Example usage
+[source, clojure]
+----
+(build-output :test "${:test-data}" ["build-resources/config.test.edn"])
+----
+
+=== opts
+
+* :dest - if we wish to send the output to a destination file
+* :print? - if we wish to have the output printed to stdout
+* :namespaces - for evaling in ctx-paths
+
+=== ctx-paths
+
+ctx-paths are deep-merged into each other starting from the first position.
+
+
+== context (ctx)
+
+When the context is created, a recursive lookup (up to 8 degrees) is
+done, allowing for building up a complete hashmap with all data
+required for building the output.
+
+.Lookup via vectors in ctx
+[source, clojure]
+----
+{:client/name "client-vip-name"
+ :image.name/platform "platform"
+ :version "1.0"
+ :docker {:production {:platform {:image-namespace [:client/name]
+                                  :image-name [:image.name/platform]
+                                  :tag [:version]}}}}
+----
+
+The above would produce the following output being run through `build-output`
+
+.Output from lookup via vectors
+[source, clojure]
+----
+{:client/name "client-vip-name"
+ :image.name/platform "platform"
+ :version "1.0"
+ :docker {:production {:platform {:image-namespace "client-vip-name"
+                                  :image-name "platform"
+                                  :tag "1.0"}}}}
+----
+
+=== ctx functions
+
+It's also possible to use functions in the context files to build the
+output. Porter supports the `user` namespace by default. Anything else
+has to be provided.
+
+The `user` namespace has a `ctx` var injected into the SCI context and
+holds the context map created from `ctx-paths`.
+
+The `ctc` var has the `env` var injected under the `:env` key and can
+be refered to as a key in the map.
+
+.Example usage
+[source, clojure]
+----
+;; source code for get-namespace+tag in 'example-ns
+
+(defn get-namespace+tag [ns n tag]
+  (format "%s.%s:%s" ns n tag))
+
+;; config.test.edn
+
+{:client/name "client-vip-name"
+ :image.name/platform "platform"
+ :version "1.0"
+ :docker {:production {:platform {:image-namespace [:client/name]
+                                  :image-name [:image.name/platform]
+                                  :tag [:version]}}}
+ :docker.image/platform+tag (example-ns/get-namespace+tag
+                              [:docker [:env] :platform :image-namespace]
+                              [:docker [:env] :platform :image-name]
+                              [:docker [:env] :platform :tag])}
+
+(build-output :test "${:test-data}" ["build-resources/config.test.edn"])
+=> {:client/name "client-vip-name"
+    :image.name/platform "platform"
+    :version "1.0"
+    :docker {:production {:platform {:image-namespace "client-vip-name"
+                                     :image-name "platform"
+                                     :tag "1.0"}}}
+    :docker.image/platform+tag "client-vip-name.platform:1.0}
+----
+
+
+== src paths
+
+When referring paths from ctx in src there are two options available.
+
+* `${:my.path/here}` - this is equalivent to a Clojure keyword
+* `${[:my :path :here]` - this is equalivent to a Clojure vector
+
+Both options are paths to the context where data can be found.
