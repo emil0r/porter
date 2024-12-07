@@ -8,7 +8,7 @@ Still a bit a experimental
 ** env is required can be things like :local, :staging, :production,
    etc
 ** src is the source input in the form of a string
-** opts is a map with expected keys :dest, :print? and :namespaces
+** opts is a map with expected keys :dest, :print? :namespaces, and :injections
 ** ctx-paths is the context to be read from files to be put into the
    src
 
@@ -23,6 +23,7 @@ Still a bit a experimental
 * :dest - if we wish to send the output to a destination file
 * :print? - if we wish to have the output printed to stdout
 * :namespaces - for evaling in ctx-paths
+* :injections - a map which will be merged with the context map
 
 === ctx-paths
 
