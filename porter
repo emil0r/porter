@@ -1,0 +1,76 @@
+#!/usr/bin/env bb
+
+(require '[babashka.cli :as cli]
+         '[babashka.deps :as deps]
+         '[babashka.fs :as fs]
+         '[clojure.set :as set])
+
+
+(deps/add-deps '{:deps {com.github.emil0r/porter {:git/url "https://github.com/emil0r/porter"
+                                                  :sha     "2bbd8cc8f8dadb256caa4a6b0d0c83a7cd6848f4"}}})
+
+(require '[porter.core :as porter])
+
+(defn show-help
+  [spec]
+  (cli/format-opts (merge spec {:order (vec (keys (:spec spec)))})))
+
+
+(def cli-spec
+  {:spec
+   {:env       {:coerce  :keyword
+                :desc    "Which environment are we deploying to: "}
+    :src       {:coerce  :string
+                :desc    "Which target in the build files are we targeting?"}
+    :dest      {:coerce :string
+                :desc   "Which file to write the output to"}
+    :print     {:coerce :boolean
+                :desc   "Print the output to stdout"}
+    :ctx-paths {:coerce   [:string]
+                :desc     "vector of strings to context edn files"
+                :required true}}
+
+   :error-fn ;; a function to handle errors
+   (fn [{:keys [_spec type cause msg option] :as _data}]
+     (when (= :org.babashka/cli type)
+       (case cause
+         :require
+         (println
+          (format "Missing required argument: %s\n" option))
+         :validate
+         (println
+          (format "%s does not exist!\n" msg)))))})
+
+(defn -main [& args]
+  (let [opts (cli/parse-opts args cli-spec)]
+    (cond
+      (or (:help opts)
+          (:h opts)
+          (empty? opts))
+      (println "-- Options --\n\n" (show-help cli-spec))
+
+      (or (not (contains? opts :env))
+          (not (contains? opts :src))
+          (not (contains? opts :ctx-paths)))
+      (do (println "env, src and ctx-paths are required")
+          (println "You are currently missing" (set/difference #{:env :src :ctx-paths} (set (keys opts)))))
+
+      (fs/exists? (:src opts))
+      (porter/build-output-from-file
+       (:env opts)
+       (:src opts)
+       {:dest (:dest opts)
+        :print? (:print opts)}
+       (:ctx-paths opts))
+
+      :else
+      (porter/build-output
+       (:env opts)
+       (:src opts)
+       {:dest (:dest opts)
+        :print? (:print opts)}
+       (:ctx-paths opts)))))
+
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (apply -main *command-line-args*))

@@ -181,7 +181,7 @@
           :else
           config)))))
 
-(defn build-output-from-file [env src ?dest ctx-paths]
+(defn build-output-from-file [env src opts ctx-paths]
   (if (not (fs/exists? src))
     (println "src does not exist" {:src src})
-    (build-output env (slurp src) ?dest ctx-paths)))
+    (build-output env (slurp src) opts ctx-paths)))
