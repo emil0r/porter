@@ -1,0 +1,3 @@
+{:full.path/here "full-path-here"
+ :another {:full {:path {:here "another-full-path-here"}}}
+ :tester (tester/print-from-tester [:version])}
