@@ -111,3 +111,9 @@ When referring paths from ctx in src there are two options available.
 * `${[:my :path :here]` - this is equalivent to a Clojure vector
 
 Both options are paths to the context where data can be found.
+
+
+= porter CLI tool
+
+There is a link:porter[porter CLI tool] which automatically downloads and uses this
+library via the command line.
