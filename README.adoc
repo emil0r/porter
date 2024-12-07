@@ -15,7 +15,7 @@ Still a bit a experimental
 .Example usage
 [source, clojure]
 ----
-(build-output :test "${:test-data}" ["build-resources/config.test.edn"])
+(build-output :test "${:test-data}" {} ["build-resources/config.test.edn"])
 ----
 
 === opts
@@ -92,7 +92,7 @@ be refered to as a key in the map.
                               [:docker [:env] :platform :image-name]
                               [:docker [:env] :platform :tag])}
 
-(build-output :test "${:test-data}" ["build-resources/config.test.edn"])
+(build-output :test "${:test-data}" {:print? true} ["build-resources/config.test.edn"])
 => {:client/name "client-vip-name"
     :image.name/platform "platform"
     :version "1.0"
