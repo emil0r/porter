@@ -118,7 +118,7 @@ Both options are paths to the context where data can be found.
 There is a link:porter[porter CLI tool] which automatically downloads and uses this
 library via the command line.
 
-
-```
+[source, shell]
+----
 curl -o /usr/local/bin/porter https://raw.githubusercontent.com/emil0r/porter/refs/heads/master/porter
-```
+----
