@@ -9,7 +9,7 @@
 
 
 (deps/add-deps '{:deps {com.github.emil0r/porter {:git/url "https://github.com/emil0r/porter"
-                                                  :sha     "2bbd8cc8f8dadb256caa4a6b0d0c83a7cd6848f4"}}})
+                                                  :sha     "7be0406876127ceaa5f3936324d28492fecd0a3c"}}})
 
 (require '[porter.core :as porter])
 
