@@ -69,7 +69,7 @@ has to be provided.
 The `user` namespace has a `ctx` var injected into the SCI context and
 holds the context map created from `ctx-paths`.
 
-The `ctc` var has the `env` var injected under the `:env` key and can
+The `ctx` var has the `env` var injected under the `:env` key and can
 be refered to as a key in the map.
 
 .Example usage
