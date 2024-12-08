@@ -164,9 +164,9 @@
                                :ctx-paths ctx-paths})
 
       :else
-      (let [config (reduce (fn [out [_s k]]
-                             (let [v (or (get ctx k)
-                                         (get-in ctx k))]
+      (let [config (reduce (fn [out [s k]]
+                             (let [v (str (or (get ctx k)
+                                              (get-in ctx k)))]
                                (str/replace out (re-k k) v)))
                            src ks-in-src)]
         (cond
