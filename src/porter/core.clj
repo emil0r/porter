@@ -178,6 +178,9 @@
           (do (println config)
               config)
 
+          dest
+          (spit dest config)
+
           :else
           config)))))
 
