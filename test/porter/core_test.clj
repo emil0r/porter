@@ -20,7 +20,7 @@
     "Missing keys")))
 
 (t/deftest functions-usage
-  (let [output (sut/build-output :test "${:test-data}"
+  (let [output (sut/build-output :test "{{:test-data}}"
                                  {:namespaces ['porter.helper]}
                                  ["dev-resources/test.functions.edn"])]
     (t/is (= output

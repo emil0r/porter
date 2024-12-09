@@ -132,11 +132,11 @@
   (re-pattern (reduce (fn [out c]
                         (str/replace out (re-pattern (str "\\" c))
                                      (str "\\\\" c)))
-                      (str "\\$\\{("
+                      (str "\\{\\{("
                            (-> (str k)
                                (str/replace #"\[" "\\\\[")
                                (str/replace #"\]" "\\\\]"))
-                           ")\\}") "+.")))
+                           ")\\}\\}") "+.")))
 
 (defn get-presence [ctx ks]
   (seq (reduce (fn [out k]
@@ -157,7 +157,7 @@
   (let [ctx (create-ctx (merge {:env env} injections) ctx-paths namespaces)
         ks-in-src (map (fn [[s exp]]
                          [s (edn/read-string exp)])
-                       (re-seq #"\$\{([^\}]+)\}" src))
+                       (re-seq #"\{\{([^\}]+)\}\}" src))
         diff (get-presence ctx (map second ks-in-src))]
     (cond
       diff

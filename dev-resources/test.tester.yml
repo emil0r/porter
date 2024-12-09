@@ -1,5 +1,5 @@
 config:
-  path: ${:full.path/here}
-  longer-path: ${[:another :full :path :here]}
-  version: ${:version}
-  tester: ${:tester}
+  path: {{:full.path/here}}
+  longer-path: {{[:another :full :path :here]}}
+  version: {{:version}}
+  tester: {{:tester}}
