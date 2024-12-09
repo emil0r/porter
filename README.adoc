@@ -8,22 +8,25 @@ Still a bit a experimental
 ** env is required can be things like :local, :staging, :production,
    etc
 ** src is the source input in the form of a string
-** opts is a map with expected keys :dest, :print? :namespaces, and :injections
+** opts is a map with optional keys `:dest`, `:print`, `:namespaces`,
+   `classpaths`, `exec` and `:injections`
 ** ctx-paths is the context to be read from files to be put into the
    src
 
 .Example usage
 [source, clojure]
 ----
-(build-output :test "${:test-data}" {} ["build-resources/config.test.edn"])
+(build-output :test "{{:test-data}}" {} ["build-resources/config.test.edn"])
 ----
 
 === opts
 
 * :dest - if we wish to send the output to a destination file
-* :print? - if we wish to have the output printed to stdout
+* :print - if we wish to have the output printed to stdout
 * :namespaces - for evaling in ctx-paths
+* :classpaths - classpaths to add to the library. Used for the SCI interpreter
 * :injections - a map which will be merged with the context map
+* :exec - do we wish to execute the src as a command in a shell
 
 === ctx-paths
 
@@ -93,7 +96,7 @@ be refered to as a key in the map.
                               [:docker [:env] :platform :image-name]
                               [:docker [:env] :platform :tag])}
 
-(build-output :test "${:test-data}" {:print? true} ["build-resources/config.test.edn"])
+(build-output :test "{{:test-data}}" {:print? true} ["build-resources/config.test.edn"])
 => {:client/name "client-vip-name"
     :image.name/platform "platform"
     :version "1.0"
@@ -108,8 +111,8 @@ be refered to as a key in the map.
 
 When referring paths from ctx in src there are two options available.
 
-* `${:my.path/here}` - this is equalivent to a Clojure keyword
-* `${[:my :path :here]` - this is equalivent to a Clojure vector
+* `{{:my.path/here}}` - this is equalivent to a Clojure keyword
+* `{{[:my :path :here]}}` - this is equalivent to a Clojure vector
 
 Both options are paths to the context where data can be found.
 
