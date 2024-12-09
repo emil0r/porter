@@ -131,5 +131,23 @@ chmod +x /usr/local/bin/porter
 .Example usage from local testing
 [source, shell]
 ----
-./porter --env :local --src "dev-resources/test.tester.yml" --ctx-paths "dev-resources/test.tester.edn" --print true --dest testus.yml --injections '{:version "1.0.0"}' --classpaths "." --namespaces tester
+/porter --env :local --src "dev-resources/test.tester.yml" --ctx-paths "dev-resources/test.tester.edn" --print true --dest testus.yml --injections '{:version "1.0.0"}' --classpaths "." --namespaces tester
+----
+
+.Options
+[source, shell]
+----
+porter --help
+
+-- Options --
+
+  --namespaces Namespaces to add
+  --injections Map of injections to the context map
+  --exec       Execute the src as a shell command
+  --src        Which target in the build files are we targeting?
+  --env        Which environment are we deploying to:
+  --classpaths Classpaths to add
+  --print      Print the output to stdout
+  --ctx-paths  vector of strings to context edn files
+  --dest       Which file to write the output to
 ----
