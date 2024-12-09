@@ -5,7 +5,6 @@
          '[babashka.deps :as deps]
          '[babashka.fs :as fs]
          '[clojure.edn :as edn]
-         '[clojure.string :as str]
          '[clojure.set :as set])
 
 (deps/add-deps '{:deps {com.github.emil0r/porter {:git/url "https://github.com/emil0r/porter"
@@ -26,13 +25,15 @@
                  :desc   "Which target in the build files are we targeting?"}
     :injections {:desc "Map of injections to the context map"}
     :classpaths {:coerce [:string]
-                 :desc "Classpaths to add"}
+                 :desc   "Classpaths to add"}
     :namespaces {:coerce [:string]
-                 :desc "Namespaces to add"}
+                 :desc   "Namespaces to add"}
     :dest       {:coerce :string
                  :desc   "Which file to write the output to"}
     :print      {:coerce :boolean
                  :desc   "Print the output to stdout"}
+    :exec       {:coerce :boolean
+                 :desc   "Execute the src as a shell command"}
     :ctx-paths  {:coerce   [:string]
                  :desc     "vector of strings to context edn files"
                  :required true}}
@@ -49,7 +50,7 @@
           (format "%s does not exist!\n" msg)))))})
 
 (defn -main [& args]
-  (let [opts (cli/parse-opts args cli-spec)
+  (let [opts       (cli/parse-opts args cli-spec)
         injections (when (string? (:injections opts))
                      (try (edn/read-string (:injections opts))
                           (catch Exception _
@@ -76,8 +77,9 @@
       (porter/build-output-from-file
        (:env opts)
        (:src opts)
-       {:dest (:dest opts)
-        :print? (:print opts)
+       {:dest       (:dest opts)
+        :print      (:print opts)
+        :exec       (:exec opts)
         :injections injections
         :namespaces namespaces}
        (:ctx-paths opts))
@@ -86,8 +88,9 @@
       (porter/build-output
        (:env opts)
        (:src opts)
-       {:dest (:dest opts)
-        :print? (:print opts)
+       {:dest       (:dest opts)
+        :print      (:print opts)
+        :exec       (:exec opts)
         :injections injections
         :namespaces namespaces}
        (:ctx-paths opts)))))

@@ -1,5 +1,6 @@
 (ns porter.core
   (:require [babashka.fs :as fs]
+            [babashka.process :refer [shell]]
             [clojure.edn :as edn]
             [clojure.string :as str]
             [clojure.zip :as zip]
@@ -152,7 +153,7 @@
                #{} ks)))
 
 
-(defn build-output [env src {:keys [dest print? namespaces injections]} ctx-paths]
+(defn build-output [env src {:keys [dest print namespaces injections exec]} ctx-paths]
   (let [ctx (create-ctx (merge {:env env} injections) ctx-paths namespaces)
         ks-in-src (map (fn [[s exp]]
                          [s (edn/read-string exp)])
@@ -169,20 +170,13 @@
                                               (get-in ctx k)))]
                                (str/replace out (re-k k) v)))
                            src ks-in-src)]
-        (cond
-          (and dest print?)
-          (do (println config)
-              (spit dest config))
-
-          print?
-          (do (println config)
-              config)
-
-          dest
-          (spit dest config)
-
-          :else
-          config)))))
+        (when print
+          (println config))
+        (when dest
+          (spit dest config))
+        (when exec
+          (shell config))
+        config))))
 
 (defn build-output-from-file [env src opts ctx-paths]
   (if (not (fs/exists? src))
