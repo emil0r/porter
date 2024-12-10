@@ -1,6 +1,6 @@
 = babashka library for creating config files
 
-Use case - You have lots of configuration files that needs to be
+You have lots of configuration files that needs to be
 generated based on input. The input is spread over multiple files
 and changes depending on what environment you're producing the
 config files for. You end up using Makefile (good) and 
