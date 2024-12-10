@@ -9,7 +9,7 @@ Still a bit a experimental
    etc
 ** src is the source input in the form of a string
 ** opts is a map with optional keys `:dest`, `:print`, `:namespaces`,
-   `classpaths`, `exec` and `:injections`
+   `:classpaths`, `:exec` and `:injections`
 ** ctx-paths is the context to be read from files to be put into the
    src
 
