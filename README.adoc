@@ -37,7 +37,7 @@ least it'll be in EDN and Babashka.
 
 === ctx-paths
 
-ctx-paths are deep-merged into each other, starting from the first position.
+ctx-paths are deep-merged into each other, starting from the first entry.
 
 
 == context (ctx)
