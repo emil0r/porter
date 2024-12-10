@@ -14,7 +14,7 @@ least it'll be in EDN and Babashka.
 * `build-output` takes [env, src, opts, ctx-paths] as arguments
 ** env is required can be things like :local, :staging, :production,
    etc
-** src is the source input in the form of a string
+** src is the source input in the form of a string or a file
 ** opts is a map with optional keys `:dest`, `:print`, `:namespaces`,
    `:classpaths`, `:exec` and `:injections`
 ** ctx-paths is the context to be read from files to be put into the
@@ -110,7 +110,7 @@ be refered to as a key in the map.
     :docker {:production {:platform {:image-namespace "client-vip-name"
                                      :image-name "platform"
                                      :tag "1.0"}}}
-    :docker.image/platform+tag "client-vip-name.platform:1.0}
+    :docker.image/platform+tag "client-vip-name.platform:1.0"}
 ----
 
 
