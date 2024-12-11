@@ -151,8 +151,8 @@ porter --help
   --namespaces Namespaces to add
   --injections Map of injections to the context map
   --exec       Execute the src as a shell command
-  --src        Which target in the build files are we targeting?
-  --env        Which environment are we deploying to:
+  --src        Source of input. String or file
+  --env        Which environment are we using
   --classpaths Classpaths to add
   --print      Print the output to stdout
   --ctx-paths  vector of strings to context edn files
