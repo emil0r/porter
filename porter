@@ -20,9 +20,9 @@
 (def cli-spec
   {:spec
    {:env        {:coerce :keyword
-                 :desc   "Which environment are we deploying to: "}
+                 :desc   "Which environment are we using"}
     :src        {:coerce :string
-                 :desc   "Which target in the build files are we targeting?"}
+                 :desc   "Source of input. String or file"}
     :injections {:desc "Map of injections to the context map"}
     :classpaths {:coerce [:string]
                  :desc   "Classpaths to add"}
@@ -57,8 +57,10 @@
                             (println "Unable to read injections"))))
         namespaces (map symbol (:namespaces opts))]
     (doseq [path (:classpaths opts)]
+      (println (format "Adding classpath '%s'" path))
       (cp/add-classpath path))
     (doseq [ns namespaces]
+      (println (format "Requiring %s" (str ns)))
       (require [ns]))
     (cond
       (or (:help opts)
