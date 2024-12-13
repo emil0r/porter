@@ -132,11 +132,11 @@
   (re-pattern (reduce (fn [out c]
                         (str/replace out (re-pattern (str "\\" c))
                                      (str "\\\\" c)))
-                      (str "\\{\\{("
+                      (str "\\{\\{\\s{0,}("
                            (-> (str k)
                                (str/replace #"\[" "\\\\[")
                                (str/replace #"\]" "\\\\]"))
-                           ")\\}\\}") "+.")))
+                           ")\\s{0,}\\}\\}") "+.")))
 
 (defn get-presence [ctx ks]
   (seq (reduce (fn [out k]
