@@ -1,0 +1,17 @@
+{:http/server       {{[:components :http/server]}}
+ :logger/component {:sentry-settings {:log? {{ [:components :logger :sentry :log?] }}
+                                      :dsn  "{{ [:components :logger :sentry :dsn] }}"}
+                    :ns-filter       {:deny #{"org.apache.http.*"
+                                              "datomic.process-monitor"
+                                              "io.netty.buffer.*"}}
+
+                    :min-level [[#{"org.eclipse.jetty.*"
+                                   "org.apache.activemq.*"
+                                   "datomic.*"} :info]
+                                [#{"*"} :debug]]}
+ :config/component  {:version "{{ :version }}"}
+ :datomic/component {:url "{{[:components :datomic :url]}}"
+                     :logger #ig/ref :logger/component}
+ :email/component   {{[:components :email]}}
+ :redis/component   {:connection-pool {}
+                     :spec            {:uri "redis://{{[:components :redis :name]}}:{{[:components :redis :port]}}"}}}

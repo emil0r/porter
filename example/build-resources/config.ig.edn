@@ -1,0 +1,17 @@
+{:http/server       {:port "3000", :swagger {:username "example-user", :password "example-password"}, :join? true}
+ :logger/component {:sentry-settings {:log? {{ [:components :logger :sentry :log?] }}
+                                      :dsn  "[:infra :production :logger :sentry :dsn]"}
+                    :ns-filter       {:deny #{"org.apache.http.*"
+                                              "datomic.process-monitor"
+                                              "io.netty.buffer.*"}}
+
+                    :min-level [[#{"org.eclipse.jetty.*"
+                                   "org.apache.activemq.*"
+                                   "datomic.*"} :info]
+                                [#{"*"} :debug]]}
+ :config/component  {:version "0fa16d3fc97f40216f950c167efeb218fae5d80f"}
+ :datomic/component {:url "datomic.sql://example:4334?jdbc:postgresql://datomic.local:5432/example?user=datomic-user&password=datomic-password"
+                     :logger #ig/ref :logger/component}
+ :email/component   {:impl :mailgun, :mailgun/api-key "<api-key>"}
+ :redis/component   {:connection-pool {}
+                     :spec            {:uri "redis://redis:6379"}}}

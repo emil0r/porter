@@ -1,0 +1,56 @@
+{:docker.image/namespace "com.example"
+ :docker.image/name      "example"
+ :customer/name          "example.com"
+ :datomic                {:service {:name [:docker.image/name]}}
+ :version                [:env]
+ :docker                 {:local      {:anchorpoint {:image-name      "anchorpoint"
+                                                     :image-namespace [:docker.image/namespace]
+                                                     :docker-file     "docker/Dockerfile.anchorpoint"
+                                                     :version         [:env]
+                                                     :sha?            false}}
+                          :production {:service     {:image-name      [:docker.image/name]
+                                                     :image-namespace [:docker.image/namespace]
+                                                     :docker-file     "docker/Dockerfile.pm"
+                                                     :version         "production"}
+                                       :anchorpoint [:docker :local :anchorpoint]}}
+ :infra                  {:production {:datomic {:protocol "datomic.sql"
+                                                 :ip       "8.4.2.1"
+                                                 :port     "4334"
+                                                 :host     "datomic.local"}
+                                       :redis   {:version "7.4.1"
+                                                 :name    "redis"
+                                                 :port    "6379"}
+                                       :swagger {:username [:secrets [:env] :swagger :username]
+                                                 :password [:secrets [:env] :swagger :password]}
+                                       :sentry  {:log? true
+                                                 :dsn  "<dsn-goes-here>"}}}
+ :mailgun                {:production {:impl            :mailgun
+                                       :mailgun/api-key [:secrets [:env] :mailgun :api-key]}}
+ :components             {:logger      {:sentry {:log? [:infra [:env] :logger :sentry :log?]
+                                                 :dsn  [:infra [:env] :logger :sentry :dsn]}}
+                          :datomic     {:url (helper/get-datomic-url [:infra [:env] :datomic :protocol]
+                                                                     [:infra [:env] :datomic :host]
+                                                                     [:infra [:env] :datomic :port]
+                                                                     [:datomic :service :name]
+                                                                     [:secrets :production :datomic :username]
+                                                                     [:secrets :production :datomic :password])}
+                          :redis       {:name [:infra [:env] :redis :name]
+                                        :port [:infra [:env] :redis :port]}
+                          :http/server {:port    "3000"
+                                        :swagger {:username [:infra [:env] :swagger :username]
+                                                  :password [:infra [:env] :swagger :password]}
+                                        :join?   true}
+                          :email       [:mailgun [:env]]}
+
+ :docker.image/service+env         (helper/get-image-name+tag [:docker [:env] :service :image-namespace]
+                                                              [:docker [:env] :service :image-name]
+                                                              [:env])
+ :docker.image/service+version     (helper/get-image-name+tag [:docker [:env] :service :image-namespace]
+                                                              [:docker [:env] :service :image-name]
+                                                              [:version])
+ :docker.image/anchorpoint+env     (helper/get-image-name+tag [:docker [:env] :anchorpoint :image-namespace]
+                                                              [:docker [:env] :anchorpoint :image-name]
+                                                              [:env])
+ :docker.image/anchorpoint+version (helper/get-image-name+tag [:docker [:env] :anchorpoint :image-namespace]
+                                                              [:docker [:env] :anchorpoint :image-name]
+                                                              [:version])}

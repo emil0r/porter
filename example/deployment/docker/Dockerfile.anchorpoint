@@ -1,0 +1,8 @@
+FROM ubuntu:latest AS anchorpoint
+
+RUN apt-get update
+RUN apt-get install -y wget
+RUN apt-get install -y gnupg
+RUN apt-get install -y curl
+
+CMD ["sleep", "infinity"]

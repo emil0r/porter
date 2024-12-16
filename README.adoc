@@ -3,7 +3,7 @@
 You have lots of configuration files that needs to be
 generated based on input. The input is spread over multiple files
 and changes depending on what environment you're producing the
-config files for. You end up using Makefile (good) and 
+config files for. You end up using Makefile (good) and
 bash/python/ruby/insert-here and question your life choices.
 
 You can now use porter and still question your life choices. But at
@@ -103,7 +103,12 @@ be refered to as a key in the map.
                               [:docker [:env] :platform :image-name]
                               [:docker [:env] :platform :tag])}
 
-(build-output :test "{{:test-data}}" {:print true} ["build-resources/config.test.edn"])
+(build-output :test
+              "config.test.edn"
+              {:print true
+               :classpaths ["classpath-example"]
+               :namespaces ['example-ns]}
+              ["build-resources/config.test.edn"])
 => {:client/name "client-vip-name"
     :image.name/platform "platform"
     :version "1.0"
@@ -138,7 +143,14 @@ chmod +x /usr/local/bin/porter
 .Example usage from local testing
 [source, shell]
 ----
-porter --env :local --src "dev-resources/test.tester.yml" --ctx-paths "dev-resources/test.tester.edn" --print true --dest testus.yml --injections '{:version "1.0.0"}' --classpaths "." --namespaces tester
+./porter --env :local
+       --src "dev-resources/test.tester.yml"
+       --ctx-paths "dev-resources/test.tester.edn"
+       --print true
+       --dest testus.yml
+       --injections '{:version "1.0.0"}'
+       --classpaths "clj"
+       --namespaces tester
 ----
 
 .Options
@@ -157,4 +169,20 @@ porter --help
   --print      Print the output to stdout
   --ctx-paths  vector of strings to context edn files
   --dest       Which file to write the output to
+----
+
+
+== Example
+
+There is a basic example of how to use porter in the example
+directory.
+
+.Create the config file
+[source, bash]
+----
+cd example
+
+make ENV=:production build-config-files-service
+
+make ENV=:production build-docker-anchorpoint
 ----
