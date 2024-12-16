@@ -178,8 +178,8 @@ porter --help
 
 == Example
 
-There is a basic example of how to use porter in the example
-directory.
+There is a basic example of how to use porter in the link:./example[example
+directory].
 
 .Create the config file
 [source, bash]
