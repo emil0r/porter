@@ -47,7 +47,7 @@
       (reduce #(rec-merge %1 %2) v vs)
       v)))
 
-(defn- massage-ctx [sci-ctx ctx]
+(defn- massage-ctx [namespaces ctx]
   (let [f (fn [ctx x]
             (cond
               (and (vector? x)
@@ -59,7 +59,7 @@
               x))
         pre-ctx (loop [next-loc (zipper ctx)
                        ctx ctx
-                       counter 7
+                       counter 30
                        idx 0]
                   (let [node (zip/node next-loc)]
                     (cond
@@ -96,7 +96,16 @@
                           (recur (zip/next next-loc)
                                  ctx
                                  counter
-                                 (inc idx)))))))]
+                                 (inc idx)))))))
+        sci-ctx (sci/init {:namespaces (merge
+                                        (when-not (= 'user (ns-name *ns*))
+                                          {'user {'ctx pre-ctx}})
+                                        {(ns-name *ns*) (merge {'ctx pre-ctx}
+                                                               (ns-publics *ns*))}
+                                        (->> namespaces
+                                             (map (fn [ns]
+                                                    {ns (ns-publics ns)}))
+                                             (into {})))})]
     (loop [next-loc (zipper pre-ctx)]
       (let [node (zip/node next-loc)]
         (cond
@@ -114,19 +123,10 @@
 (defn create-ctx [ctx paths & [namespaces]]
   (assert "One of the paths does not exist" (every? fs/exists? paths))
   (let [ctx'    (-> (reduce (fn [out path]
-                           (deep-merge out (edn/read-string (slurp path))))
+                              (deep-merge out (edn/read-string (slurp path))))
                             {} paths)
-                 (merge ctx))
-        sci-ctx (sci/init {:namespaces (merge
-                                        (when-not (= 'user (ns-name *ns*))
-                                          {'user {'ctx ctx'}})
-                                        {(ns-name *ns*) (merge {'ctx ctx'}
-                                                               (ns-publics *ns*))}
-                                        (->> namespaces
-                                             (map (fn [ns]
-                                                    {ns (ns-publics ns)}))
-                                             (into {})))})]
-    (massage-ctx sci-ctx ctx')))
+                    (merge ctx))]
+    (massage-ctx namespaces ctx')))
 
 (defn re-s [s]
   (re-pattern (-> s
@@ -151,24 +151,28 @@
 
 
 (defn build-output [env src {:keys [dest print namespaces injections exec]} ctx-paths]
-  (let [ctx (create-ctx (merge {:env env} injections) ctx-paths namespaces)
-        ks-in-src (map (comp
-                        (fn [[s exp :as v]]
-                          (if (vector? exp)
-                            [s (->> exp
-                                    (map (fn [x]
-                                           (if (vector? x)
-                                             (get-in ctx x)
-                                             x)))
-                                    (vec))]
-                            v))
-                        (fn [[s exp]]
-                          [s (edn/read-string exp)]))
-                       (re-seq #"\{\{([^\}]+)\}\}" src))
-        diff (get-presence ctx (map second ks-in-src))]
+  (let [ctx       (create-ctx (merge {:env env} injections) ctx-paths namespaces)
+        ks-in-src (mapv (comp
+                         (fn [[s exp :as v]]
+                           (if (vector? exp)
+                             [s (->> exp
+                                     (map (fn [x]
+                                            (if (vector? x)
+                                              (get-in ctx x)
+                                              x)))
+                                     (vec))]
+                             v))
+                         (fn [[s exp]]
+                           (try
+                             [s (edn/read-string exp)]
+                             (catch Exception e
+                               (throw (ex-info "Unable to parse expression" {:expression exp
+                                                                             :e          e}))))))
+                        (re-seq #"\{\{([^\}]+)\}\}" src))
+        diff      (get-presence ctx (map second ks-in-src))]
     (cond
       diff
-      (println "Missing keys" {:diff diff
+      (println "Missing keys" {:diff      diff
                                :ctx-paths ctx-paths})
 
       :else
