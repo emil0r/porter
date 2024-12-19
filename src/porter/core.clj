@@ -128,15 +128,12 @@
                                              (into {})))})]
     (massage-ctx sci-ctx ctx')))
 
-(defn re-k [k]
-  (re-pattern (reduce (fn [out c]
-                        (str/replace out (re-pattern (str "\\" c))
-                                     (str "\\\\" c)))
-                      (str "\\{\\{\\s{0,}("
-                           (-> (str k)
-                               (str/replace #"\[" "\\\\[")
-                               (str/replace #"\]" "\\\\]"))
-                           ")\\s{0,}\\}\\}") "+.")))
+(defn re-s [s]
+  (re-pattern (-> s
+                  (str/replace #"\[" "\\\\[")
+                  (str/replace #"\]" "\\\\]")
+                  (str/replace #"\{" "\\\\{")
+                  (str/replace #"\}" "\\\\}"))))
 
 (defn get-presence [ctx ks]
   (seq (reduce (fn [out k]
@@ -155,8 +152,18 @@
 
 (defn build-output [env src {:keys [dest print namespaces injections exec]} ctx-paths]
   (let [ctx (create-ctx (merge {:env env} injections) ctx-paths namespaces)
-        ks-in-src (map (fn [[s exp]]
-                         [s (edn/read-string exp)])
+        ks-in-src (map (comp
+                        (fn [[s exp :as v]]
+                          (if (vector? exp)
+                            [s (->> exp
+                                    (map (fn [x]
+                                           (if (vector? x)
+                                             (get-in ctx x)
+                                             x)))
+                                    (vec))]
+                            v))
+                        (fn [[s exp]]
+                          [s (edn/read-string exp)]))
                        (re-seq #"\{\{([^\}]+)\}\}" src))
         diff (get-presence ctx (map second ks-in-src))]
     (cond
@@ -168,7 +175,7 @@
       (let [config (reduce (fn [out [s k]]
                              (let [v (str (or (get ctx k)
                                               (get-in ctx k)))]
-                               (str/replace out (re-k k) v)))
+                               (str/replace out (re-s s) v)))
                            src ks-in-src)]
         (when print
           (println config))

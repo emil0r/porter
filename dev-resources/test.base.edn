@@ -1,2 +1,6 @@
 {:full.path/here "full-path-here"
- :another {:full {:path {:here "another-full-path-here"}}}}
+ :another        {:full {:path {:here "another-full-path-here"}}}
+ :infra          {:staging    {:postgres {:user     "staging-user"
+                                          :password "staging-password"}}
+                  :production {:postgres {:user     "production-user"
+                                          :password "production-password"}}}}

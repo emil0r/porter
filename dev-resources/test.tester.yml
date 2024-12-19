@@ -2,4 +2,6 @@ config:
   path: {{:full.path/here}}
   longer-path: {{[:another :full :path :here]}}
   version: {{:version}}
-  tester: {{:tester}}
+  postgres:
+    user: {{ [:infra [:env] :postgres :user] }}
+    user: {{ [:infra [:env] :postgres :password] }}
