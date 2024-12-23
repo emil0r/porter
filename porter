@@ -89,7 +89,7 @@
                                   namespaces))
 
 
-      (fs/exists? (:src opts))
+      (fs/exists? (str/join "\n" (:src opts)))
       (porter/build-output-from-file
        (:env opts)
        (str/join "\n" (:src opts))
