@@ -186,7 +186,9 @@
         (when dest
           (spit dest config))
         (when exec
-          (shell config))
+          (doseq [to-exec (str/split config #"\n")]
+            (when-not (str/blank? to-exec)
+              (shell to-exec))))
         config))))
 
 (defn build-output-from-file [env src opts ctx-paths]
