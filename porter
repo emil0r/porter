@@ -5,10 +5,11 @@
          '[babashka.deps :as deps]
          '[babashka.fs :as fs]
          '[clojure.edn :as edn]
-         '[clojure.set :as set])
+         '[clojure.set :as set]
+         '[clojure.string :as str])
 
 (deps/add-deps '{:deps {com.github.emil0r/porter {:git/url "https://github.com/emil0r/porter"
-                                                  :sha     "55ab04281de745db4c2f14ccf456205175e1a364"}}})
+                                                  :sha     "0770676d85425749148046393cd7ef8527c12fde"}}})
 
 (require '[porter.core :as porter])
 
@@ -19,24 +20,28 @@
 
 (def cli-spec
   {:spec
-   {:env        {:coerce :keyword
-                 :desc   "Which environment are we using"}
-    :src        {:coerce :string
-                 :desc   "Source of input. String or file"}
-    :injections {:desc "Map of injections to the context map"}
-    :classpaths {:coerce [:string]
-                 :desc   "Classpaths to add"}
-    :namespaces {:coerce [:string]
-                 :desc   "Namespaces to add"}
-    :dest       {:coerce :string
-                 :desc   "Which file to write the output to"}
-    :print      {:coerce :boolean
-                 :desc   "Print the output to stdout"}
-    :exec       {:coerce :boolean
-                 :desc   "Execute the src as a shell command"}
-    :ctx-paths  {:coerce   [:string]
-                 :desc     "vector of strings to context edn files"
-                 :required true}}
+   {:env              {:coerce :keyword
+                       :desc   "Which environment are we using"}
+    :src              {:coerce [:string]
+                       :desc   "Source of input. String or file. Can be multiple lines which will be joined together with a newline in between each entry. This is meant mainly for exec (blame Make)"}
+    :injections       {:desc "Map of injections to the context map"}
+    :classpaths       {:coerce [:string]
+                       :desc   "Classpaths to add"}
+    :namespaces       {:coerce [:string]
+                       :desc   "Namespaces to add"}
+    :dest             {:coerce :string
+                       :desc   "Which file to write the output to"}
+    :print            {:coerce :boolean
+                       :desc   "Print the output to stdout"}
+    :print-ctx        {:coerce :boolean
+                       :desc   "Print ctx map to stdout"}
+    :print-injections {:coerce :boolean
+                       :desc   "Print injections to stdout"}
+    :exec             {:coerce :boolean
+                       :desc   "Execute the src as a shell command"}
+    :ctx-paths        {:coerce   [:string]
+                       :desc     "vector of strings to context edn files"
+                       :required true}}
 
    :error-fn ;; a function to handle errors
    (fn [{:keys [_spec type cause msg option] :as _data}]
@@ -75,10 +80,19 @@
       (do (println "env, src and ctx-paths are required")
           (println "You are currently missing" (set/difference #{:env :src :ctx-paths} (set (keys opts)))))
 
+      (:print-injections opts)
+      (println injections)
+
+      (:print-ctx opts)
+      (println (porter/create-ctx (merge {:env (:env opts)} injections)
+                                  (:ctx-paths opts)
+                                  namespaces))
+
+
       (fs/exists? (:src opts))
       (porter/build-output-from-file
        (:env opts)
-       (:src opts)
+       (str/join "\n" (:src opts))
        {:dest       (:dest opts)
         :print      (:print opts)
         :exec       (:exec opts)
@@ -89,7 +103,7 @@
       :else
       (porter/build-output
        (:env opts)
-       (:src opts)
+       (str/join "\n" (:src opts))
        {:dest       (:dest opts)
         :print      (:print opts)
         :exec       (:exec opts)
