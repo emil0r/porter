@@ -25,3 +25,27 @@
                                  ["dev-resources/test.functions.edn"])]
     (t/is (= output
              "Foobar is true and Foobaz is false"))))
+
+(t/deftest keys-are-offset
+  (let [output (sut/build-output :test "{{ :full.path/here}}"
+                                 {:namespaces ['porter.helper]}
+                                 ["dev-resources/test.base.edn"])]
+    (t/is (= output
+             "full-path-here")))
+
+  (let [output (sut/build-output :test "{{ [:full.path/here   ]}}"
+                                 {:namespaces ['porter.helper]}
+                                 ["dev-resources/test.base.edn"])]
+    (t/is (= output
+             "full-path-here")))
+
+  (let [output (sut/build-output :test "{{[:full.path/here] }}"
+                                 {:namespaces ['porter.helper]}
+                                 ["dev-resources/test.base.edn"])]
+    (t/is (= output
+             "full-path-here")))
+  (let [output (sut/build-output :test "{{ [:full.path/here]}}"
+                                 {:namespaces ['porter.helper]}
+                                 ["dev-resources/test.base.edn"])]
+    (t/is (= output
+             "full-path-here"))))
