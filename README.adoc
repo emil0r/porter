@@ -34,6 +34,8 @@ least it'll be in EDN and Babashka.
 
 * :dest - if we wish to send the output to a destination file
 * :print - if we wish to have the output printed to stdout
+* :print-ctx - if we wish to have the context map printed to stdout
+* :print-injections - if we wish to have the injection map printed to stdout
 * :namespaces - for evaling in ctx-paths
 * :classpaths - classpaths to add to the library. Used for the SCI interpreter
 * :injections - a map which will be merged with the context map
