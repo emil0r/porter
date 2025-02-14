@@ -183,15 +183,17 @@ porter --help
 
 -- Options --
 
-  --namespaces Namespaces to add
-  --injections Map of injections to the context map
-  --exec       Execute the src as a shell command
-  --src        Source of input. String or file
-  --env        Which environment are we using
-  --classpaths Classpaths to add
-  --print      Print the output to stdout
-  --ctx-paths  vector of strings to context edn files
-  --dest       Which file to write the output to
+  --namespaces       Namespaces to add
+  --print-injections Print injections to stdout
+  --injections       Map of injections to the context map
+  --exec             Execute the src as a shell command
+  --src              Source of input. String or file. Can be multiple lines which will be joined together with a newline in between each entry. This is meant mainly for exec (blame Make)
+  --env              Which environment are we using
+  --classpaths       Classpaths to add
+  --print            Print the output to stdout
+  --print-ctx        Print ctx map to stdout
+  --ctx-paths        vector of strings to context edn files
+  --dest             Which file to write the output to
 ----
 
 
