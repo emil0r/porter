@@ -7,6 +7,17 @@
             [sci.core :as sci]))
 
 
+(defn- escape-code
+  [i]
+  (str "\033[" i "m"))
+
+(def colors-reset (escape-code 0))
+(def colors-fg {:red   (escape-code 31)
+                :white (escape-code 37)})
+(def colors-bg {:on-red (escape-code 41)
+                :on-white (escape-code 47)})
+
+
 (defmulti branch? class)
 (defmethod branch? :default                       [_] false)
 (defmethod branch? clojure.lang.IPersistentVector [_] true)
@@ -191,14 +202,18 @@
      (check-validity ctx src))))
 
 
-(defn build-output [env src {:keys [dest print namespaces injections exec] :as opts} ctx-paths]
+(defn build-output [env src {:keys [dest print namespaces injections exec]} ctx-paths]
   (let [ctx       (create-ctx (merge {:env env} injections) ctx-paths namespaces)
         ks-in-src (get-ks-in-src src ctx)
         validity  (check-validity ctx src)      ]
     (cond
       (or (seq (:broken-paths  validity))
           (seq (:empty-paths   validity)))
-      (println "Invalid input" validity)
+      (do (println "Invalid input")
+          (when (seq (:broken-paths validity))
+            (println "Broken paths" (:white colors-fg) (:on-red colors-bg) (:broken-paths validity) colors-reset))
+          (when (seq (:empty-paths validity))
+            (println "Empty paths" (:white colors-fg) (:on-red colors-bg) (:empty-paths validity) colors-reset)))
 
       :else
       (let [config (reduce (fn [out [s k]]
