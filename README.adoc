@@ -162,14 +162,16 @@ Gives the following output.
 * `Adding classpath 'clj'` is from the classpath specified
 * `Requiring tester` is a namespace used
 * `This is from tester 1.0.0` is from a function called from the `tester` namespace
-* `Invalid input` gives a map of either empty paths or broken paths for the src file
+* `Invalid input` gives output of either empty paths or broken paths for the src file
+** Empty paths and Broken paths will be *colored red with a white background*
 
 [source,shell]
 ----
 Adding classpath 'clj'
 Requiring tester
 This is from tester 1.0.0
-Invalid input {:empty-paths #{[:infra :local :postgres :user] [:infra :local :postgres :password]}, :broken-paths #{}}
+Invalid input 
+Empty paths #{[:infra :local :postgres :user] [:infra :local :postgres :password]}, :broken-paths #{}
 ----
 
 .Options
