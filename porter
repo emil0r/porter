@@ -5,6 +5,7 @@
          '[babashka.deps :as deps]
          '[babashka.fs :as fs]
          '[clojure.edn :as edn]
+         '[clojure.pprint]
          '[clojure.set :as set]
          '[clojure.string :as str])
 
@@ -61,12 +62,17 @@
                           (catch Exception _
                             (println "Unable to read injections"))))
         namespaces (map symbol (:namespaces opts))]
-    (doseq [path (:classpaths opts)]
-      (println (format "Adding classpath '%s'" path))
-      (cp/add-classpath path))
-    (doseq [ns namespaces]
-      (println (format "Requiring %s" (str ns)))
-      (require [ns]))
+
+    (when (or (seq (:classpaths opts))
+              (seq namespaces))
+      (println "\n--- Loading classpaths/namespaces ---\n")
+      (doseq [path (:classpaths opts)]
+        (println (format "Adding classpath '%s'" path))
+        (cp/add-classpath path))
+      (doseq [ns namespaces]
+        (println (format "Requiring %s" (str ns)))
+        (require [ns]))
+      (println "\n--- Classpaths/namespaces loaded  ---\n"))
     (cond
       (or (:help opts)
           (:h opts)
@@ -81,12 +87,13 @@
           (println "You are currently missing" (set/difference #{:env :src :ctx-paths} (set (keys opts)))))
 
       (:print-injections opts)
-      (println injections)
+      (clojure.pprint/pprint injections)
 
       (:print-ctx opts)
-      (println (porter/create-ctx (merge {:env (:env opts)} injections)
-                                  (:ctx-paths opts)
-                                  namespaces))
+      (clojure.pprint/pprint
+       (porter/create-ctx (merge {:env (:env opts)} injections)
+                          (:ctx-paths opts)
+                          namespaces))
 
 
       (fs/exists? (str/join "\n" (:src opts)))
