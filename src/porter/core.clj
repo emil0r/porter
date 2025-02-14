@@ -58,9 +58,9 @@
               :else
               x))
         pre-ctx (loop [next-loc (zipper ctx)
-                       ctx ctx
-                       counter 30
-                       idx 0]
+                       ctx      ctx
+                       counter  30
+                       idx      0]
                   (let [node (zip/node next-loc)]
                     (cond
                       (>= idx 100000)
@@ -80,7 +80,9 @@
                       :else
                       (let [v (f ctx node)]
                         (cond
-                          (nil? v)
+                          ;; value is nil and it's not a lookup
+                          (and (nil? v)
+                               (not (vector? node)))
                           (recur (zip/next next-loc)
                                  ctx
                                  counter
@@ -122,10 +124,10 @@
 
 (defn create-ctx [ctx paths & [namespaces]]
   (assert "One of the paths does not exist" (every? fs/exists? paths))
-  (let [ctx'    (-> (reduce (fn [out path]
-                              (deep-merge out (edn/read-string (slurp path))))
-                            {} paths)
-                    (merge ctx))]
+  (let [ctx' (-> (reduce (fn [out path]
+                           (deep-merge out (edn/read-string (slurp path))))
+                         {} paths)
+                 (merge ctx))]
     (massage-ctx namespaces ctx')))
 
 (defn re-s [s]
@@ -149,31 +151,54 @@
                        out))
                #{} ks)))
 
+(defn get-ks-in-src [src ctx]
+  (mapv (comp
+         (fn [[s exp :as v]]
+           (if (vector? exp)
+             [s (->> exp
+                     (map (fn [x]
+                            (if (vector? x)
+                              (get-in ctx x)
+                              x)))
+                     (vec))]
+             v))
+         (fn [[s expr]]
+           (try
+             [s (edn/read-string expr)]
+             (catch Exception _
+               [s ::invalid-key]))))
+        (re-seq #"\{\{([^\}]+)\}\}" src)))
 
-(defn build-output [env src {:keys [dest print namespaces injections exec]} ctx-paths]
+(defn invalid-key? [k]
+  (= k ::invalid-key))
+
+
+(defn check-validity
+  ([ctx src]
+   (let [ks-in-src    (get-ks-in-src src ctx)
+         valid-ks     (->> ks-in-src
+                           (remove (comp invalid-key? second))
+                           (map second))
+         invalid-ks   (->> ks-in-src
+                           (filter (comp invalid-key? second))
+                           (map first))
+         empty-paths  (set (get-presence ctx valid-ks))
+         broken-paths (set invalid-ks)]
+     {:empty-paths  empty-paths
+      :broken-paths broken-paths}))
+  ([env src {:keys [namespaces injections]} ctx-paths]
+   (let [ctx (create-ctx (merge {:env env} injections) ctx-paths namespaces)]
+     (check-validity ctx src))))
+
+
+(defn build-output [env src {:keys [dest print namespaces injections exec] :as opts} ctx-paths]
   (let [ctx       (create-ctx (merge {:env env} injections) ctx-paths namespaces)
-        ks-in-src (mapv (comp
-                         (fn [[s exp :as v]]
-                           (if (vector? exp)
-                             [s (->> exp
-                                     (map (fn [x]
-                                            (if (vector? x)
-                                              (get-in ctx x)
-                                              x)))
-                                     (vec))]
-                             v))
-                         (fn [[s exp]]
-                           (try
-                             [s (edn/read-string exp)]
-                             (catch Exception e
-                               (throw (ex-info "Unable to parse expression" {:expression exp
-                                                                             :e          e}))))))
-                        (re-seq #"\{\{([^\}]+)\}\}" src))
-        diff      (get-presence ctx (map second ks-in-src))]
+        ks-in-src (get-ks-in-src src ctx)
+        validity  (check-validity ctx src)      ]
     (cond
-      diff
-      (println "Missing keys" {:diff      diff
-                               :ctx-paths ctx-paths})
+      (or (seq (:broken-paths  validity))
+          (seq (:empty-paths   validity)))
+      (println "Invalid input" validity)
 
       :else
       (let [config (reduce (fn [out [s k]]

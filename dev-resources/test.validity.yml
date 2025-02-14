@@ -1,0 +1,17 @@
+# exists
+{{ :ctx1 }}
+
+# exists, but is a map
+{{ :ctx2 }}
+
+# exists, but is an broken path
+{{ [:ctx2 :name }}
+
+# key that does not exist
+{{ :ctx3 }}
+
+# path that leads to nowhere because :ctx4 is a string
+{{ [:ctx4 :env] }}
+
+# points to a value that does not exist
+{{ [:empty-path] }}
