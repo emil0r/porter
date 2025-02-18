@@ -59,3 +59,13 @@
     (t/is (= #{"{{ [:ctx2 :name }}"}
              (:broken-paths output))
           "invalid paths")))
+
+
+(t/deftest skip-test
+  (let [output (sut/build-output :test (slurp "dev-resources/test.skip.yml")
+                                   nil ["dev-resources/test.ctx.skip.edn"])]
+    (t/is (= output
+             "[:ctx3]
+
+This is really ctx3\n")
+          "One lookup was skipped")))

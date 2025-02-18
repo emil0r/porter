@@ -91,6 +91,12 @@
                       :else
                       (let [v (f ctx node)]
                         (cond
+                          (true? (:skip (meta node)))
+                          (recur (zip/next next-loc)
+                                 ctx
+                                 counter
+                                 (inc idx))
+
                           ;; value is nil and it's not a lookup
                           (and (nil? v)
                                (not (vector? node)))
