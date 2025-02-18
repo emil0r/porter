@@ -2,7 +2,7 @@
 
 image:assets/porter.jpeg[porter]
 
-= babashka library for creating config files 
+= babashka library for creating config files
 
 You have lots of configuration files that needs to be
 generated based on input. The input is spread over multiple files
@@ -48,9 +48,14 @@ ctx-paths are deep-merged into each other, starting from the first entry.
 
 == context (ctx)
 
-When the context is created, a recursive lookup (up to 8 degrees) is
+When the context is created, a recursive lookup (up to 30 degrees) is
 done, allowing for building up a complete hashmap with all data
 required for building the output.
+
+It's possible to manually skip processing by adding `^:skip` as a
+metadata in front of any element inside the EDN ctx map. Main use is
+when you wish to protect arguments sent in to `ctx functions` from
+being processed (as lookup vectors).
 
 .Lookup via vectors in ctx
 [source, clojure]
@@ -59,8 +64,8 @@ required for building the output.
  :image.name/platform "platform"
  :version "1.0"
  :docker {:production {:platform {:image-namespace [:client/name]
-                                  :image-name [:image.name/platform]
-                                  :tag [:version]}}}}
+                                  :image-name      [:image.name/platform]
+                                  :tag             [:version]}}}}
 ----
 
 The above would produce the following output being run through `build-output`
@@ -151,7 +156,7 @@ chmod +x /usr/local/bin/porter
 ----
 ./porter --env :local \
        --src "dev-resources/test.tester.yml" \
-       --ctx-paths "dev-resources/test.tester.edn" \ 
+       --ctx-paths "dev-resources/test.tester.edn" \
        --print true \
        --dest testus.yml \
        --injections '{:version "1.0.0"}' \
@@ -172,7 +177,7 @@ Gives the following output.
 Adding classpath 'clj'
 Requiring tester
 This is from tester 1.0.0
-Invalid input 
+Invalid input
 Empty paths #{[:infra :local :postgres :user] [:infra :local :postgres :password]}, :broken-paths #{}
 ----
 
