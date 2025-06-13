@@ -3,4 +3,6 @@
  :infra          {:staging    {:postgres {:user     "staging-user"
                                           :password "staging-password"}}
                   :production {:postgres {:user     "production-user"
-                                          :password "production-password"}}}}
+                                          :password "production-password"}}}
+ :false-key      false
+ :true-key       true}

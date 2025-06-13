@@ -154,14 +154,14 @@
                   (str/replace #"\{" "\\\\{")
                   (str/replace #"\}" "\\\\}"))))
 
-(defn get-presence [ctx ks]
+(defn get-missing-presence [ctx ks]
   (seq (reduce (fn [out k]
                  (cond (and (keyword? k)
-                            (not (get ctx k)))
+                            (nil? (get ctx k)))
                        (conj out k)
 
                        (and (vector? k)
-                            (not (get-in ctx k)))
+                            (nil? (get-in ctx k)))
                        (conj out k)
 
                        :else
@@ -199,7 +199,7 @@
          invalid-ks   (->> ks-in-src
                            (filter (comp invalid-key? second))
                            (map first))
-         empty-paths  (set (get-presence ctx valid-ks))
+         empty-paths  (set (get-missing-presence ctx valid-ks))
          broken-paths (set invalid-ks)]
      {:empty-paths  empty-paths
       :broken-paths broken-paths}))
@@ -223,8 +223,9 @@
 
       :else
       (let [config (reduce (fn [out [s k]]
-                             (let [v (str (or (get ctx k)
-                                              (get-in ctx k)))]
+                             (let [v (str (if (some? (get ctx k))
+                                            (get ctx k)
+                                            (get-in ctx k)))]
                                (str/replace out (re-s s) v)))
                            src ks-in-src)]
         (when print

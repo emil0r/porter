@@ -50,6 +50,28 @@
     (t/is (= output
              "full-path-here"))))
 
+(t/deftest false-true-keys-test
+  (let [output (sut/build-output :test "{{[:false-key]}}"
+                                 {:namespaces ['porter.helper]}
+                                 ["dev-resources/test.base.edn"])]
+    (t/is (= output
+             "false")))
+  (let [output (sut/build-output :test "{{:false-key}}"
+                                 {:namespaces ['porter.helper]}
+                                 ["dev-resources/test.base.edn"])]
+    (t/is (= output
+             "false")))
+  (let [output (sut/build-output :test "{{[:true-key]}}"
+                                 {:namespaces ['porter.helper]}
+                                 ["dev-resources/test.base.edn"])]
+    (t/is (= output
+             "true")))
+  (let [output (sut/build-output :test "{{:true-key}}"
+                                 {:namespaces ['porter.helper]}
+                                 ["dev-resources/test.base.edn"])]
+    (t/is (= output
+             "true"))))
+
 (t/deftest validity-test
   (let [output (sut/check-validity :test (slurp "dev-resources/test.validity.yml")
                                    nil ["dev-resources/test.ctx.validity.edn"])]
@@ -63,7 +85,7 @@
 
 (t/deftest skip-test
   (let [output (sut/build-output :test (slurp "dev-resources/test.skip.yml")
-                                   nil ["dev-resources/test.ctx.skip.edn"])]
+                                 nil ["dev-resources/test.ctx.skip.edn"])]
     (t/is (= output
              "[:ctx3]
 
